@@ -201,13 +201,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .links a:hover { 
             text-decoration: underline;
         }
+        .logo img {
+            max-width: 150px;
+            max-height: 150px;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(40,40,80,0.08);
+            margin-left: auto;
+            margin-right: auto;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">
-            <i class="fas fa-graduation-cap"></i>
-            <h1>Semester Marks</h1>
+                <img src="logo.png" alt="Logo">
+            <h1>Sem Marks</h1>
         </div>
         
         <?php if ($error): ?>

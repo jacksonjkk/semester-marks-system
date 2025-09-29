@@ -22,32 +22,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['set1_done'] = false;
         }
     }
-    // Save Test 1 and Coursework 1
+    // Save Test 1 and/or Coursework 1 (allow partial entry)
     elseif (isset($_POST['save_set1'])) {
         $course_unit = $_SESSION['selected_course_unit'] ?? '';
-        $test1 = floatval($_POST['test1'] ?? 0);
-        $coursework1 = floatval($_POST['coursework1'] ?? 0);
-        
-        // Validate marks
-        $valid = true;
-        if ($test1 < 0 || $test1 > 20) {
-            $error = 'Test 1 marks must be between 0 and 20.';
-            $valid = false;
-        } elseif ($coursework1 < 0 || $coursework1 > 10) {
-            $error = 'Coursework 1 marks must be between 0 and 10.';
-            $valid = false;
-        }
-        
-        if ($valid) {
-            $stmt = $conn->prepare('INSERT INTO marks (user_id, course_unit, test1, coursework1) VALUES (?, ?, ?, ?)');
-            $stmt->bind_param('isdd', $user_id, $course_unit, $test1, $coursework1);
-            if ($stmt->execute()) {
-                $success = 'Test 1 and Coursework 1 saved! Now enter Test 2 and Coursework 2.';
-                $_SESSION['set1_done'] = true;
-            } else {
-                $error = 'Failed to save marks.';
+        $test1 = isset($_POST['test1']) && $_POST['test1'] !== '' ? floatval($_POST['test1']) : null;
+        $coursework1 = isset($_POST['coursework1']) && $_POST['coursework1'] !== '' ? floatval($_POST['coursework1']) : null;
+
+        // Validate at least one is provided
+        if ($test1 === null && $coursework1 === null) {
+            $error = 'Please enter at least Test 1 or Coursework 1.';
+        } else {
+            $valid = true;
+            if ($test1 !== null && ($test1 < 0 || $test1 > 20)) {
+                $error = 'Test 1 marks must be between 0 and 20.';
+                $valid = false;
             }
-            $stmt->close();
+            if ($coursework1 !== null && ($coursework1 < 0 || $coursework1 > 10)) {
+                $error = 'Coursework 1 marks must be between 0 and 10.';
+                $valid = false;
+            }
+            if ($valid) {
+                // Assign to temp variables for bind_param
+                $test1_db = ($test1 !== null ? $test1 : 0);
+                $coursework1_db = ($coursework1 !== null ? $coursework1 : 0);
+                $stmt = $conn->prepare('INSERT INTO marks (user_id, course_unit, test1, coursework1) VALUES (?, ?, ?, ?)');
+                $stmt->bind_param('isdd', $user_id, $course_unit, $test1_db, $coursework1_db);
+                if ($stmt->execute()) {
+                    $success = 'Set 1 marks saved! Now enter Test 2 and Coursework 2.';
+                    $_SESSION['set1_done'] = true;
+                } else {
+                    $error = 'Failed to save marks.';
+                }
+                $stmt->close();
+            }
         }
     }
     // Save Test 2 and Coursework 2
@@ -389,7 +396,7 @@ if ($stats_query && $stats_query->num_rows > 0) {
             color: #2575fc;
             text-align: center;
         }
-        .grading-explanation {
+        /* .grading-explanation {
             background: #fff8e1;
             padding: 15px;
             border-radius: 6px;
@@ -399,7 +406,7 @@ if ($stats_query && $stats_query->num_rows > 0) {
         .grading-explanation h4 {
             color: #ff9800;
             margin-bottom: 8px;
-        }
+        } */
         .submit-btn {
             width: 100%;
             padding: 13px;
@@ -794,8 +801,8 @@ if ($stats_query && $stats_query->num_rows > 0) {
                                     padding: 0 6px;
                                 }
                                 .header-logo img {
-                                    max-width: 110px;
-                                    max-height: 110px;
+                                    max-width: 100px;
+                                    max-height: 100px;
                                     margin-bottom: 4px;
                                 }
                                 .header-title-user {
@@ -836,8 +843,8 @@ if ($stats_query && $stats_query->num_rows > 0) {
                                     gap: 32px;
                                 }
                                 .header-logo img {
-                                    max-width: 80px;
-                                    max-height: 80px;
+                                    max-width: 150px;
+                                    max-height: 150px;
                                     display: block;
                                     border-radius: 12px;
                                     box-shadow: 0 2px 8px rgba(40,40,80,0.08);
@@ -1029,12 +1036,13 @@ if ($stats_query && $stats_query->num_rows > 0) {
                             <h4>Set 1 Marks</h4>
                             <div class="form-group">
                                 <label for="test1">Test 1 <span class="marks-limit">(0-20 marks)</span></label>
-                                <input type="number" id="test1" name="test1" min="0" max="20" step="0.5" required>
+                                <input type="number" id="test1" name="test1" min="0" max="20" step="0.5">
                             </div>
                             <div class="form-group">
                                 <label for="coursework1">Coursework 1 <span class="marks-limit">(0-10 marks)</span></label>
-                                <input type="number" id="coursework1" name="coursework1" min="0" max="10" step="0.5" required>
+                                <input type="number" id="coursework1" name="coursework1" min="0" max="10" step="0.5">
                             </div>
+                            <div style="font-size:0.95em;color:#888;margin-bottom:8px;">You may enter only Test 1 or Coursework 1 and add the other later.</div>
                         </div>
                         <button type="submit" name="save_set1" class="submit-btn">
                             <i class="fa-solid fa-save"></i> Save Set 1 Marks
@@ -1061,12 +1069,12 @@ if ($stats_query && $stats_query->num_rows > 0) {
                 <?php endif; ?>
             <?php endif; ?>
 
-            <div class="grading-explanation">
+            <!-- <div class="grading-explanation">
                 <h4><i class="fa-solid fa-info-circle"></i> Grading Information</h4>
                 <p><strong>Best Test:</strong> Higher score between Test 1 and Test 2</p>
                 <p><strong>Total Coursework:</strong> Sum of Coursework 1 and Coursework 2</p>
                 <p><strong>Final Score:</strong> Best Test + Total Coursework (out of 40)</p>
-            </div>
+            </div> -->
         </div>
 
         <!-- Progress Overview -->
