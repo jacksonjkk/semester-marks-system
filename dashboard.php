@@ -170,10 +170,22 @@ if ($stats_query && $stats_query->num_rows > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="application-name" content="Semester Marks">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Semester Marks">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="msapplication-TileColor" content="#2575fc">
+<meta name="msapplication-tap-highlight" content="no">
+<meta name="theme-color" content="#2575fc">
     <title>Semester Marks System</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ENjdO4Dr2bkBIFxQpeoA6VZgQAnbL9A7+U6U8g5QkP4ylFf4l+4t5F5d5z5F5d5F" crossorigin="anonymous">
+    <link rel="icon" type="image/png" href="icons/icon-72x72.png">
+<link rel="apple-touch-icon" href="icons/icon-152x152.png">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-startup-image" href="icons/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -850,6 +862,105 @@ if ($stats_query && $stats_query->num_rows > 0) {
                                     display: flex;
                                     align-items: center;
                                 }
+                                /* PWA Specific Styles */
+@media (display-mode: standalone) {
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+    
+    .header {
+        padding-top: calc(22px + env(safe-area-inset-top));
+    }
+}
+
+/* Enhanced touch targets for mobile */
+@media (max-width: 768px) {
+    .btn, .submit-btn, .edit-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .form-group input, .form-group select {
+        min-height: 44px;
+    }
+}
+
+/* Loading animation for app */
+.app-loading {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+}
+
+.app-loading.show {
+    display: flex;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.pwa-install-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 10px;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    transition: all 0.3s ease;
+}
+
+.pwa-install-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Style for standalone mode */
+.pwa-standalone .pwa-install-btn {
+    display: none !important;
+}
+
+/* Offline indicator */
+.offline-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ff6b6b;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    z-index: 10000;
+    display: none;
+}
+
+.offline .offline-indicator {
+    display: block;
+}
     </style>
 </head>
 <body>
@@ -866,11 +977,12 @@ if ($stats_query && $stats_query->num_rows > 0) {
                     <?php if (isset($_SESSION['semester'])): ?>, Semester <?php echo $_SESSION['semester']; ?><?php endif; ?>
                 </div>
             </div>
-            <div class="header-logout">
-                <a href="logout.php" class="logout-header-btn">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
-                </a>
-            </div>
+           <div class="header-logout">
+    <!-- Install button will be inserted here by pwa.js -->
+    <a href="logout.php" class="logout-header-btn">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </a>
+</div>
         </div>
     </div>
 
@@ -1215,5 +1327,12 @@ if ($stats_query && $stats_query->num_rows > 0) {
             });
         });
     </script>
+    <!-- Offline Indicator -->
+<div class="offline-indicator" id="offlineIndicator">
+    <i class="fas fa-wifi"></i> You are currently offline
+</div>
+
+<!-- PWA Script -->
+<script src="js/pwa.js"></script>
 </body>
 </html>

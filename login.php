@@ -54,10 +54,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Semester Marks Portal">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SemesterMarks">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="msapplication-TileColor" content="#ffffffff">
+<meta name="msapplication-TileImage" content="icons/icon-144x144.png">
+<meta name="msapplication-tap-highlight" content="no">
+<meta name="theme-color" content="#ffffffff">
     <title>Login - Semester Marks System</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
+<link rel="apple-touch-icon" href="icons/icon-152x152.png">
+   <link rel="manifest" href="manifest.json">
+   <style>
+    .pwa-install-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 10px;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    transition: all 0.3s ease;
+}
+
+.pwa-install-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Style for standalone mode */
+.pwa-standalone .pwa-install-btn {
+    display: none !important;
+}
+
+/* Offline indicator */
+.offline-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ff6b6b;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    z-index: 10000;
+    display: none;
+}
+
+.offline .offline-indicator {
+    display: block;
+}
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: 'Montserrat', Arial, sans-serif; 
@@ -183,5 +237,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="register.php">Don't have an account? Register</a>
         </div>
     </div>
+    <!-- Offline Indicator -->
+<div class="offline-indicator" id="offlineIndicator">
+    <i class="fas fa-wifi"></i> You are currently offline
+</div>
+
+<!-- PWA Script -->
+<script src="js/pwa.js"></script>
 </body>
 </html>
